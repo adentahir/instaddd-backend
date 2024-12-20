@@ -1,66 +1,52 @@
 import {
-  AppErrStatus,
-  AppResult,
-  DtoValidationError,
-  assertUnreachablePassthrough,
-} from "@carbonteq/hexapp"
-import {
   BadRequestException,
   ConflictException,
   InternalServerErrorException,
   NotFoundException,
   NotImplementedException,
-  ServiceUnavailableException,
   UnauthorizedException,
   UnprocessableEntityException,
 } from "@nestjs/common"
-
-export interface HttpResponseData<T> {
-  data: T
-}
+import { ValidationResult } from "@shared/utils"
 
 // biome-ignore lint/complexity/noStaticOnlyClass: <explanation>
 export class HttpResponse {
-  private static processError(r: AppResult<never>): never {
-    const err = r.unwrapErr()
-    const errMsg = err.message
+  private static processError<T, E>(result: ValidationResult<T, E>): never {
+    const errMsg = result.error || "Unknown error occurred"
 
-    switch (err.status) {
-      case AppErrStatus.NotFound:
-        throw new NotFoundException(errMsg, { cause: err })
-      case AppErrStatus.InvalidData:
-        throw new UnprocessableEntityException(errMsg, { cause: err })
-      case AppErrStatus.Unauthorized:
-        throw new UnauthorizedException(errMsg, { cause: err })
-      case AppErrStatus.AlreadyExists:
-        throw new ConflictException(errMsg, { cause: err })
-      case AppErrStatus.InvalidOperation:
-        throw new BadRequestException(errMsg, { cause: err })
-      case AppErrStatus.GuardViolation:
-        throw new BadRequestException(errMsg, { cause: err })
-      case AppErrStatus.Generic:
-        throw new InternalServerErrorException(errMsg, { cause: err })
+    switch (result.error) {
+      case "NotFound":
+        throw new NotFoundException(errMsg)
+      case "InvalidData":
+        throw new UnprocessableEntityException(errMsg)
+      case "Unauthorized":
+        throw new UnauthorizedException(errMsg)
+      case "AlreadyExists":
+        throw new ConflictException(errMsg)
+      case "InvalidOperation":
+        throw new BadRequestException(errMsg)
+      case "Generic":
+        throw new InternalServerErrorException(errMsg)
       default:
-        assertUnreachablePassthrough(err.status)
-        throw new NotImplementedException(
-          `Well, this is embarrassing. We don't know what error this is: "${errMsg}"`,
-        )
+        throw new NotImplementedException(`Unhandled error type: "${errMsg}"`)
     }
   }
 
-  static handleAppResult<T>(res: AppResult<T>): T {
-    if (res.isErr()) {
-      HttpResponse.processError(res)
-    } else {
-      return res.unwrap()
+  static handleValidationResult<T, E = string>(
+    result: ValidationResult<T, E>,
+  ): T {
+    if (!result.success) {
+      // biome-ignore lint/complexity/noThisInStatic: <explanation>
+      this.processError(result)
     }
+    // biome-ignore lint/style/noNonNullAssertion: <explanation>
+    return result.data!
   }
 
-  static handleError(err: unknown) {
-    if (err instanceof DtoValidationError) {
-      return new UnprocessableEntityException(err.message)
+  static handleError(err: unknown): never {
+    if (err instanceof Error) {
+      throw new InternalServerErrorException(err.message, { cause: err })
     }
-
-    return err
+    throw new InternalServerErrorException("An unexpected error occurred.")
   }
 }
