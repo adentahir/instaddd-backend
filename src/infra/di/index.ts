@@ -3,10 +3,15 @@ import { DatabaseModule } from "@infra/db/database.module"
 import { JwtServProvider } from "@infra/jwt"
 import { PinoAppLoggerModule } from "@infra/logger"
 import { HashingServiceProvider } from "@infra/pwhashing"
+import { StorageServiceProvider } from "@infra/storage"
 import { Global, Module } from "@nestjs/common"
 
 // Stuff like Redis, Elasticsearch
-const BASE_SERVICES = [HashingServiceProvider, JwtServProvider]
+const BASE_SERVICES = [
+  HashingServiceProvider,
+  JwtServProvider,
+  StorageServiceProvider,
+]
 
 @Global()
 @Module({

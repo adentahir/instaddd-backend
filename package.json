@@ -40,6 +40,7 @@
     "@nestjs/typeorm": "^10.0.2",
     "@node-rs/argon2": "^1.8.3",
     "ajv-formats": "^3.0.1",
+    "cloudinary": "^2.5.1",
     "date-fns": "^3.6.0",
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.32.1",
