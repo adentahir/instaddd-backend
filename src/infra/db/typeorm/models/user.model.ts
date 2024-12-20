@@ -52,5 +52,5 @@ export class UserModel {
       onDelete: "CASCADE",
     },
   )
-  profileOwner: ProfileOwnerModel
+  profileOwner: unknown
 }
