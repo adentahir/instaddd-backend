@@ -16,6 +16,10 @@ export abstract class ProfileOwnerRepository {
     entity: ProfileOwner,
   ): Promise<ValidationResult<ProfileOwner, ProfileOwnerAlreadyExists>>
 
+  abstract search(
+    searchTerm: string,
+  ): Promise<ValidationResult<ProfileOwner[], ProfileOwnerNotFound>>
+
   abstract update(
     entity: ProfileOwner,
   ): Promise<ValidationResult<ProfileOwner, ProfileOwnerNotFound>>
