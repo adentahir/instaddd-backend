@@ -1,4 +1,16 @@
-import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from "typeorm"
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  JoinTable,
+  ManyToMany,
+  OneToMany,
+  OneToOne,
+  PrimaryColumn,
+} from "typeorm"
+import { CommentModel } from "./comment.model"
+import { LikeModel } from "./like.model"
+import { PostModel } from "./post.model"
 import { UserModel } from "./user.model"
 
 @Entity("profileOwner")
@@ -54,5 +66,36 @@ export class ProfileOwnerModel {
     user => user.profileOwner,
   )
   @JoinColumn({ name: "user_id", referencedColumnName: "id" })
-  user: unknown // UserModel    TODO: fix this circular dependency
+  user: UserModel // UserModel    TODO: fix this circular dependency
+
+  @OneToMany(
+    () => PostModel,
+    post => post.profileOwner,
+  )
+  posts: PostModel[]
+
+  @OneToMany(
+    () => CommentModel,
+    comment => comment.profileOwner,
+  )
+  comments: CommentModel[]
+
+  @OneToMany(
+    () => LikeModel,
+    like => like.profileOwner,
+  )
+  likes: LikeModel[]
+
+  // Self-referencing relationships for followers and following
+  @OneToMany(
+    () => ProfileOwnerModel,
+    profile => profile.following,
+  )
+  followers: ProfileOwnerModel[]
+
+  @OneToMany(
+    () => ProfileOwnerModel,
+    profile => profile.followers,
+  )
+  following: ProfileOwnerModel[]
 }

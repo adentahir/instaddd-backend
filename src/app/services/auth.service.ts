@@ -1,11 +1,8 @@
-import type {
-  //   ForgotPasswordDto,
-  LoginDto,
-  //   ResetPasswordDto,
-  //   SignUpDto,
-} from "@app/dtos/auth.dto"
+import type { LoginDto, SignUpDto } from "@app/dtos/auth.dto"
 import { JwtService } from "@app/services"
 import { PwHashingService } from "@app/services/pw-hashing.service"
+import { ProfileOwner } from "@domain/entities/profileOwner/profileOwner.entity"
+import { ProfileOwnerRepository } from "@domain/entities/profileOwner/profileOwner.repository"
 import { User } from "@domain/entities/user/user.entity"
 import { UserRepository } from "@domain/entities/user/user.respository"
 import { Injectable } from "@nestjs/common"
@@ -16,6 +13,7 @@ export class AuthService {
     private readonly pwHashServ: PwHashingService,
     private readonly tokenServ: JwtService,
     private readonly userRepo: UserRepository,
+    private readonly profileOwnerRepo: ProfileOwnerRepository,
   ) {}
 
   async login({ email, password }: LoginDto) {
@@ -29,7 +27,7 @@ export class AuthService {
 
     if (match.success === false) return { success: false, error: match.error }
 
-    const view = this.tokenServ.sign({
+    const view = await this.tokenServ.sign({
       email: userRes.data.email,
       role: userRes.data.role,
     })
@@ -37,39 +35,41 @@ export class AuthService {
     return { success: true, data: view }
   }
 
-  //   async signup({ email, password, username, baseUrl }: SignUpDto) {
-  //     const pwHashed = this.pwHashServ.hash(password)
+  async signup({
+    email,
+    password,
+    username,
+    fullName,
+    isPrivate,
+    avatar,
+  }: SignUpDto) {
+    const pwHashed = this.pwHashServ.hash(password)
 
-  //     const user = await this.userRepo.insert(User.new(username, email, pwHashed))
+    const user = await this.userRepo.insert(
+      User.newProfileOwner(email, pwHashed),
+    )
 
-  //     const verifyReq = await user
-  //       .map(VerifyRequest.forUser)
-  //       .bind(req => this.verifyRequestRepo.insert(req))
+    if (user.success && user.data) {
+      const profileOwner = ProfileOwner.create({
+        username: username,
+        fullName: fullName,
+        isPrivate: isPrivate,
+        userId: user.data.id,
+        avatar: avatar,
+      })
 
-  //     const _emailRes = await verifyReq.map(req =>
-  //       this.emailServ.sendVerificationLink(email, baseUrl, req.id),
-  //     )
+      const insertedProfileOwner =
+        await this.profileOwnerRepo.insert(profileOwner)
 
-  //     const loginToken = user.map(u => this.tokenServ.sign({ userId: u.id }))
+      if (
+        insertedProfileOwner.success === false ||
+        insertedProfileOwner.data === undefined
+      )
+        return { success: false, error: insertedProfileOwner.error }
 
-  //     return AppResult.fromResult(loginToken)
-  //   }
+      return { success: true, data: insertedProfileOwner.data.serialize() }
+    }
 
-  //   async forgotPassword({ email, baseUrl }: ForgotPasswordDto) {
-  //     const user = await this.userRepo.fetchByEmail(email)
-
-  //     const resetReq = await user
-  //       .map(ResetRequest.forUser)
-  //       .bind(req => this.resetRequestRepo.insert(req))
-
-  //     const _emailRes = await resetReq.map(req =>
-  //       this.emailServ.sendForgotPasswordEmail(email, baseUrl, req.id),
-  //     )
-
-  //     return AppResult.Ok({
-  //       message: "You'll recieve an email with the link to reset your password",
-  //     })
-  //   }
-
-  async resetPassword({ reqId, newPassword }) {}
+    return { success: false, error: user.error }
+  }
 }
