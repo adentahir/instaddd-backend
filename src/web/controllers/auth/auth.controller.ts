@@ -12,7 +12,9 @@ import {
   forwardRef,
 } from "@nestjs/common"
 import { ApiTags } from "@nestjs/swagger"
+import { Public } from "@web/utils/decorators/public.decorators"
 
+@Public()
 @ApiTags("auth")
 @Controller("auth")
 export class AuthController {

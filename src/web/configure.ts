@@ -24,6 +24,9 @@ export const createApp = (): Promise<NestFastifyApplication> => {
   const app = NestFactory.create<NestFastifyApplication>(WebModule, adapter, {
     bufferLogs: true,
     rawBody: true,
+    cors: {
+      origin: "http://localhost:3001",
+    },
   })
   return app
 }

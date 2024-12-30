@@ -45,5 +45,6 @@ export class LikeModel {
       onDelete: "CASCADE",
     },
   )
-  post: PostModel
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  post: any
 }

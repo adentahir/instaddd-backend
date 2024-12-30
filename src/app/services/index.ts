@@ -1,3 +1,8 @@
 export { JwtService } from "./jwt.service"
 export { type JwtPayload } from "./jwt.service"
 export { PwHashingService } from "./pw-hashing.service"
+export { ProfileService } from "./profile.service"
+export { StorageService } from "./storage.service"
+export { PostService } from "./post.service"
+export { CommentService } from "./comment.service"
+export { AuthService } from "./auth.service"

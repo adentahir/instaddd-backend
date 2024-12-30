@@ -53,7 +53,8 @@ export class CommentModel {
       onDelete: "CASCADE",
     },
   )
-  post: PostModel
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  post: any
 
   @ManyToOne(
     () => CommentModel,
@@ -62,7 +63,8 @@ export class CommentModel {
       nullable: true,
     },
   )
-  replyTo: CommentModel
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  replyTo: any
 
   @OneToMany(
     () => CommentModel,

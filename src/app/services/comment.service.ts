@@ -8,7 +8,7 @@ import { Injectable } from "@nestjs/common"
 export class CommentService {
   constructor(private readonly commentRepo: CommentRepository) {}
 
-  async AddComment(dto: AddCommentDto) {
+  async addComment(dto: AddCommentDto) {
     const comment = Comment.create({
       postId: dto.postId,
       message: dto.message,
@@ -24,7 +24,7 @@ export class CommentService {
     return { success: true, data: insertedComment.data.serialize() }
   }
 
-  async RemoveComment(id: UUID) {
+  async removeComment(id: UUID) {
     const removedComment = await this.commentRepo.deleteById(id)
 
     if (!removedComment.success) {
@@ -34,7 +34,7 @@ export class CommentService {
     return { success: true, data: "Comment removed" }
   }
 
-  async UpdateComment(dto: UpdateCommentDto) {
+  async updateComment(dto: UpdateCommentDto) {
     const comment = await this.commentRepo.fetchById(dto.id)
 
     if (!comment.success || !comment.data) {

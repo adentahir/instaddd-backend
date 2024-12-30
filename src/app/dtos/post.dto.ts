@@ -22,18 +22,23 @@ export class AddPostDto extends BaseDto {
   private static readonly schema = z.object({
     caption: z.string().min(1).max(500),
     media: z.array(z.string().url()),
+    profileId: UUID,
   })
 
   private constructor(
     readonly caption: string,
     readonly media: string[],
+    readonly profileId: UUID,
   ) {
     super()
   }
 
   static create(data: unknown): DtoValidationResult<AddPostDto> {
     const res = BaseDto.validate(AddPostDto.schema, data)
-    return res.map(({ caption, media }) => new AddPostDto(caption, media))
+    return res.map(
+      ({ caption, media, profileId }) =>
+        new AddPostDto(caption, media, profileId),
+    )
   }
 }
 
@@ -60,7 +65,6 @@ export class UpdatePostDto extends BaseDto {
 // DTO for Like or Undo Like Post
 export class LikeOrUndoLikePostDto extends BaseDto {
   private static readonly schema = z.object({
-    postId: UUID,
     userId: UUID,
   })
 
@@ -71,10 +75,11 @@ export class LikeOrUndoLikePostDto extends BaseDto {
     super()
   }
 
-  static create(data: unknown): DtoValidationResult<LikeOrUndoLikePostDto> {
+  static create(
+    data: unknown,
+    postId: UUID,
+  ): DtoValidationResult<LikeOrUndoLikePostDto> {
     const res = BaseDto.validate(LikeOrUndoLikePostDto.schema, data)
-    return res.map(
-      ({ postId, userId }) => new LikeOrUndoLikePostDto(postId, userId),
-    )
+    return res.map(({ userId }) => new LikeOrUndoLikePostDto(postId, userId))
   }
 }

@@ -7,6 +7,8 @@ export interface IProfileOwner extends IEntity {
   avatar: string | null // We can use Option to avoid defending null values
   isPrivate: boolean
   userId: UUID
+  // following: UUID[]
+  // followers: UUID[]
 }
 
 export interface SerializedProfileOwner
@@ -21,6 +23,8 @@ export class ProfileOwner extends BaseEntity implements IProfileOwner {
   #avatar: string | null
   #isPrivate: boolean
   readonly userId: UUID
+  #following: UUID[]
+  #followers: UUID[]
 
   private constructor(data: Omitt<SerializedProfileOwner, keyof IEntity>) {
     super()
@@ -29,6 +33,8 @@ export class ProfileOwner extends BaseEntity implements IProfileOwner {
     this.#avatar = data.avatar
     this.#isPrivate = data.isPrivate
     this.userId = UUID.fromTrusted(data.userId)
+    // this.#following = data.following ?? []
+    // this.#followers = data.followers ?? []
   }
 
   static create(
@@ -61,6 +67,34 @@ export class ProfileOwner extends BaseEntity implements IProfileOwner {
     return this.#isPrivate
   }
 
+  // get following(): IProfileOwner["following"] {
+  //   return this.#following
+  // }
+
+  // get followers(): IProfileOwner["followers"] {
+  //   return this.#followers
+  // }
+
+  // follow(profileId: UUID) {
+  //   if (this.#following.includes(profileId)) {
+  //     throw new Error("You are already following this profile.")
+  //   }
+
+  //   this.#following.push(profileId)
+
+  //   return this
+  // }
+
+  // unFollow(profileId: UUID) {
+  //   if (!this.#following.includes(profileId)) {
+  //     throw new Error("You are not following this profile.")
+  //   }
+
+  //   this.#following = this.#following.filter(id => id !== profileId)
+
+  //   return this
+  // }
+
   update(data: Partial<Omitt<SerializedProfileOwner, keyof IEntity>>) {
     // Omit unnecessary fields for security reasons
     //TODO: Guarding before updating the entity
@@ -83,6 +117,8 @@ export class ProfileOwner extends BaseEntity implements IProfileOwner {
       avatar: this.avatar,
       isPrivate: this.isPrivate,
       userId: this.userId,
+      // following: this.following,
+      // followers: this.followers,
     } satisfies SerializedProfileOwner
   }
 }

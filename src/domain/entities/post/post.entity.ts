@@ -1,4 +1,4 @@
-import { BaseEntity } from "@carbonteq/hexapp"
+import { BaseEntity, UUID } from "@carbonteq/hexapp"
 import type { IEntity, Omitt, SerializedEntity } from "@shared/utils"
 
 export interface Like {
@@ -11,6 +11,7 @@ export interface IPost extends IEntity {
   media: string[] //TODO: URI[] or URL[] would be better types
   likes: Like[]
   comments: number
+  profileId: UUID
 }
 
 export type CreatePostData = Omitt<
@@ -23,10 +24,11 @@ export interface SerializedPost extends SerializedEntity {
   media: string[]
   likes: Like[]
   comments: number
+  profileId: string
 }
 
 export type UpdatePostData = Partial<
-  Omitt<SerializedPost, keyof IEntity | "likes">
+  Omitt<SerializedPost, keyof IEntity | "likes" | "profileId">
 >
 
 export interface IPostPublic extends Omitt<SerializedPost, "likes"> {
@@ -38,6 +40,7 @@ export class Post extends BaseEntity implements IPost {
   #media: string[]
   #likes: Like[]
   #comments: number
+  readonly profileId: UUID
 
   private constructor(data: Omitt<SerializedPost, keyof IEntity>) {
     super()
@@ -46,6 +49,7 @@ export class Post extends BaseEntity implements IPost {
     this.#media = data.media
     this.#likes = data.likes
     this.#comments = data.comments
+    this.profileId = UUID.fromTrusted(data.profileId)
   }
 
   static create(data: CreatePostData): Post {
@@ -115,6 +119,7 @@ export class Post extends BaseEntity implements IPost {
       media: this.media,
       likes: this.likes.length,
       comments: this.comments,
+      profileId: this.profileId,
     }
   }
 
@@ -125,6 +130,7 @@ export class Post extends BaseEntity implements IPost {
       media: this.media,
       likes: this.likes,
       comments: this.comments,
+      profileId: this.profileId,
     } satisfies SerializedPost
   }
 }

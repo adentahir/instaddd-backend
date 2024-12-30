@@ -1,3 +1,4 @@
+import { PaginationDto } from "@app/dtos/pagnation.dto"
 import {
   AddPostDto,
   LikeOrUndoLikePostDto,
@@ -26,6 +27,7 @@ export class PostService {
     const post = Post.create({
       caption: dto.caption,
       media: dto.media,
+      profileId: dto.profileId,
     })
 
     const insertedPost = await this.postRepo.insert(post)
@@ -67,21 +69,66 @@ export class PostService {
 
   async LikeOrUndoLikePost({ postId, userId }: LikeOrUndoLikePostDto) {
     const post = await this.postRepo.fetchById(postId)
+    console.log(post.data?.serialize())
 
     if (!post.success || !post.data) {
       return { success: false, error: post.error }
     }
 
-    const updateEnt = post.data.likes.find(like => like.userId === userId)
-      ? post.data.unLike(userId)
-      : post.data.like(userId)
+    let update: Post | null = null
 
-    const updated = await this.postRepo.update(updateEnt)
+    if (post.data.like.length === 0) {
+      update = post.data.like(userId)
+    } else if (post.data.like.length > 0) {
+      update = post.data.likes.find(like => like.userId === userId)
+        ? post.data.unLike(userId)
+        : post.data.like(userId)
+    }
+
+    if (!update) {
+      return { success: false, error: "Failed to update post" }
+    }
+
+    const updated = await this.postRepo.update(update)
 
     if (!updated.success || !updated.data) {
       return { success: false, error: updated.error }
     }
 
     return { success: true, data: updated.data.serialize() }
+  }
+
+  async FetchPostForProfile(id: UUID) {
+    const posts = await this.postRepo.fetchAllForProfileOwner(id)
+
+    if (!posts.success || !posts.data) {
+      return { success: false, error: posts.error }
+    }
+
+    return { success: true, data: posts.data.map(p => p.serialize()) }
+  }
+
+  async FetchFeedForProfileOwner(userId: UUID, dto: PaginationDto) {
+    const posts = await this.postRepo.fetchFeedForProfileOwner(userId, dto)
+
+    if (!posts.success || !posts.data) {
+      return { success: false, error: posts.error }
+    }
+
+    const comments = posts.data.data.comment.map(c => c.serialize())
+    const postsSer = posts.data.data.post.map(p => p.serialize())
+    const profiles = posts.data.data.profileOwner.map(p => p.serialize())
+
+    const serData = { comments, posts: postsSer, profiles }
+
+    return {
+      success: true,
+      data: {
+        data: serData,
+        pageNum: posts.data.pageNum,
+        pageSize: posts.data.pageSize,
+        totalPages: posts.data.totalPages,
+      },
+    }
   }
 }
