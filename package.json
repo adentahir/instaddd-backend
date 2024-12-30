@@ -32,6 +32,7 @@
     "@carbonteq/hexapp": "^0.18.3",
     "@carbonteq/jwt": "^0.4.0",
     "@fastify/multipart": "^8.3.0",
+    "@fastify/swagger": "^9.4.0",
     "@napi-rs/uuid": "^0.2.2",
     "@nestjs/common": "^10.3.10",
     "@nestjs/core": "^10.3.10",

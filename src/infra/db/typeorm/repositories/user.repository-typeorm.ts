@@ -73,6 +73,7 @@ export class UserRepo extends UserRepository {
 
       return { success: true, data: User.fromSerialized(data) }
     } catch (err) {
+      console.log(err)
       return { success: false, error: new UserAlreadyExists(entity.email) }
     }
   }

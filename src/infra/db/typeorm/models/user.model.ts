@@ -31,8 +31,6 @@ export class UserModel {
   })
   role: UserRole
 
-  @Column("character varying", { name: "refresh_token" }) refreshToken: string
-
   @Column("timestamp with time zone", {
     name: "created_at",
     default: () => "now()",

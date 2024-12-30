@@ -1,3 +1,4 @@
+import { CommentService, PostService, ProfileService } from "@app/services"
 import { AuthService } from "@app/services/auth.service"
 import { DatabaseModule } from "@infra/db/database.module"
 import { JwtServProvider } from "@infra/jwt"
@@ -31,7 +32,7 @@ const DOMAIN_SERVICES = []
 class DomainServicesModule {}
 
 //app services module
-const APP_SERVICES = [AuthService]
+const APP_SERVICES = [AuthService, CommentService, PostService, ProfileService]
 
 @Global()
 @Module({
@@ -39,7 +40,7 @@ const APP_SERVICES = [AuthService]
   providers: APP_SERVICES,
   exports: APP_SERVICES,
 })
-class AppServiceModule {}
+export class AppServiceModule {}
 
 //workflow module
 const WORKFLOWS = []

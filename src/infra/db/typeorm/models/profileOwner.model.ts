@@ -40,7 +40,7 @@ export class ProfileOwnerModel {
     nullable: true,
     length: 128,
   })
-  avatar: string
+  avatar: string | null
 
   @Column("boolean", {
     name: "isPrivate",

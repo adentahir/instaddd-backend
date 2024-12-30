@@ -5,6 +5,7 @@ import {
   CommentNotFound,
 } from "@domain/entities/comment/comment.errors"
 import { CommentRepository } from "@domain/entities/comment/comment.repository"
+import { Provider } from "@nestjs/common"
 import { ValidationResult } from "@shared/utils"
 import { EntityManager, Repository } from "typeorm"
 import ds from "../../datasource.config"
@@ -25,7 +26,7 @@ export class CommentRepo extends CommentRepository {
     return data
       ? {
           success: true,
-          data: Comment.fromSerialized({ ...data, replyto: "" }),
+          data: Comment.fromSerialized({ ...data, replyto: data.replyTo.id }),
         }
       : { success: false, error: new CommentNotFound(id) }
   }
@@ -33,10 +34,17 @@ export class CommentRepo extends CommentRepository {
   async fetchAllForPost(
     postId: UUID,
   ): Promise<ValidationResult<Comment[], CommentNotFound>> {
-    const data = await this.commentRepo.find({ where: { postId } })
+    const data = await this.commentRepo.find({
+      where: { postId },
+      relations: ["post", "user", "replyto"],
+      order: { createdAt: "DESC" },
+    })
+
     return {
       success: true,
-      data: data.map(c => Comment.fromSerialized({ ...c, replyto: "" })),
+      data: data.map(c =>
+        Comment.fromSerialized({ ...c, replyto: c.replyTo.id }),
+      ),
     }
   }
 
@@ -60,4 +68,9 @@ export class CommentRepo extends CommentRepository {
     await this.commentRepo.delete({ id })
     return { success: true, data: null }
   }
+}
+
+export const CommentProvider: Provider<CommentRepository> = {
+  provide: CommentRepository,
+  useClass: CommentRepo,
 }

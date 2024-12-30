@@ -27,4 +27,16 @@ export abstract class ProfileOwnerRepository {
   abstract deleteById(
     Id: UUID,
   ): Promise<ValidationResult<null, ProfileOwnerNotFound>>
+
+  abstract follow(followerId: UUID, followingId: UUID): Promise<void>
+
+  abstract unfollow(followerId: UUID, followingId: UUID): Promise<void>
+
+  abstract getFollowers(
+    id: UUID,
+  ): Promise<ValidationResult<ProfileOwner[], ProfileOwnerNotFound>>
+
+  abstract getFollowing(
+    id: UUID,
+  ): Promise<ValidationResult<ProfileOwner[], ProfileOwnerNotFound>>
 }

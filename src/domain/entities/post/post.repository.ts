@@ -1,14 +1,23 @@
-import { UUID } from "@carbonteq/hexapp"
-import { ValidationResult } from "@shared/utils"
-import type { Post } from "./post.entity"
+import { PaginationDto } from "@app/dtos/pagnation.dto"
+import { Omitt, UUID } from "@carbonteq/hexapp"
+import { Comment } from "@domain/entities/comment/comment.entity"
+import { Paginated, ValidationResult } from "@shared/utils"
+import { ProfileOwner } from "../profileOwner/profileOwner.entity"
+import { Post } from "./post.entity"
 import type { PostAlreadyExists, PostNotFound } from "./post.errors"
+
+export type PostWithComments = {
+  post: Post[]
+  comment: Comment[]
+  profileOwner: ProfileOwner[]
+}
 
 //TODO: Create a Base Repository Class with genrics and extend All Repositories for Open Closed Principle
 export abstract class PostRepository {
   abstract fetchById(id: UUID): Promise<ValidationResult<Post, PostNotFound>>
 
   abstract fetchAllForProfileOwner(
-    postId: UUID,
+    userId: UUID,
   ): Promise<ValidationResult<Post[], PostNotFound>>
 
   abstract insert(
@@ -19,7 +28,8 @@ export abstract class PostRepository {
 
   abstract deleteById(Id: UUID): Promise<ValidationResult<null, PostNotFound>>
 
-  //   abstract fetchAllforTags(
-  //     tags: string[],
-  //   ): Promise<ValidationResult<Post[], PostNotFound>>
+  abstract fetchFeedForProfileOwner(
+    userId: UUID,
+    dto: PaginationDto,
+  ): Promise<ValidationResult<Paginated<PostWithComments>, PostNotFound>> //todo: Make a readmodel
 }
